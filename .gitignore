@@ -1,0 +1,20 @@
+# General
+.DS_Store
+Thumbs.db
+.vscode/
+.env
+.env.*
+
+# Backend (Python)
+backend/__pycache__/
+backend/.pytest_cache/
+backend/venv/
+backend/*.egg-info/
+backend/build/
+backend/dist/
+
+# Frontend (React + Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env*
