@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import Base, engine
+from app.routers import auth
+from app.models import user
 
-from routers import auth
 
 
 app = FastAPI()
@@ -21,3 +23,8 @@ def read_root():
 
 
 app.include_router(auth.router)
+
+
+Base.metadata.create_all(bind=engine)
+
+

@@ -1,10 +1,11 @@
 # routers/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from schemas.user import UserCreate, UserOut
-from models.user import User
-from utils.security import hash_password
-from database import get_db
+from app.schemas.user import UserCreate, UserLogin, UserOut
+from app.models.user import User
+from app.utils.security import hash_password
+from app.database import get_db
+from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -24,16 +25,22 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 @router.post("/login")
-def login(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
-    if not db_user or not db_user.verify_password(user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    # Here you would typically create a JWT token and return it
-    return {"message": "Login successful", "user": db_user}
+def login(user_cred: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == user_cred.email).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+
+    if not pwd_context.verify(user_cred.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+
+    return {"message": "Login successful", "user_id": user.id}
 
 @router.get("/me", response_model=UserOut)
-def get_current_user(db: Session = Depends(get_db), user: User = Depends(get_current_active_user)):
+def get_current_user(db: Session = Depends(get_db), user: User = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return user
-

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 
-from database import Base
+from app.database import Base
+from pydantic import BaseModel, EmailStr
 
 class User(Base):
     __tablename__ = "users"
