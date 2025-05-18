@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.database import Base
 from pydantic import BaseModel, EmailStr
+
+bookmarks = relationship("Bookmark", back_populates="user")
+
 
 class User(Base):
     __tablename__ = "users"
